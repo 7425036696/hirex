@@ -35,7 +35,7 @@ export const Payment: React.FC<PaymentProps> = ({ plan, onPaymentSuccess, onPaym
                 plan_id: plan.id
             },
             theme: {
-                color: "#3b82f6"
+                color: "#299fff"
             },
             handler: function (response: any) {
                 // This function is called on successful payment
@@ -74,7 +74,7 @@ export const Payment: React.FC<PaymentProps> = ({ plan, onPaymentSuccess, onPaym
 
     return (
         <div className="max-w-md mx-auto p-4 sm:p-6 lg:p-8 text-center mt-16 animate-fade-in">
-             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 p-8">
                 {isLoading && (
                      <>
                         <svg className="animate-spin mx-auto h-8 w-8 text-primary-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@ export const Payment: React.FC<PaymentProps> = ({ plan, onPaymentSuccess, onPaym
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Initializing Secure Payment...</h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-2">Please wait while we redirect you to Razorpay.</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2">Please wait while we redirect you to the payment gateway.</p>
                      </>
                 )}
                  {error && (

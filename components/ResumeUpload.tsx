@@ -72,20 +72,20 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ job, onAnalysisCompl
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
                 Back to Job Selection
             </button>
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analyze Your Resume for</h2>
-                    <h1 className="text-3xl font-extrabold text-primary-600 dark:text-primary-400 mt-1">{job.title}</h1>
+                    <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400 mt-1">{job.title}</h1>
                     <p className="text-gray-500 dark:text-gray-400">at {job.company}</p>
                 </div>
 
                 <div className="mt-8">
                     <label htmlFor="resume-upload" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload your resume (.txt, .md)</label>
-                    <div className="mt-2 flex justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 px-6 py-10 hover:border-primary-500 dark:hover:border-primary-400 transition-colors">
+                    <div className="mt-2 flex justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 px-6 py-10 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300">
                         <div className="text-center">
                             <UploadCloudIcon className="mx-auto h-12 w-12 text-gray-400" />
                             <div className="mt-4 flex text-sm leading-6 text-gray-600 dark:text-gray-400">
-                                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-gray-800 font-semibold text-primary-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-800 hover:text-primary-500">
+                                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white dark:bg-gray-900 font-semibold text-primary-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-900 hover:text-primary-500">
                                     <span>Upload a file</span>
                                     <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".txt,.md" />
                                 </label>
@@ -103,7 +103,7 @@ export const ResumeUpload: React.FC<ResumeUploadProps> = ({ job, onAnalysisCompl
                     <button
                         onClick={handleAnalyze}
                         disabled={!file || isLoading}
-                        className="w-full flex justify-center items-center gap-2 bg-primary-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-bold py-3 px-4 rounded-lg hover:from-primary-700 hover:to-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-300 shadow-lg hover:shadow-xl disabled:bg-gradient-to-r disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
                     >
                         {isLoading ? (
                             <>

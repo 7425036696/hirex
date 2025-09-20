@@ -179,19 +179,19 @@ export const Interview: React.FC<InterviewProps> = ({ job, resumeAnalysis, onInt
 
     return (
         <div className="max-w-4xl mx-auto p-4 flex flex-col h-[calc(100vh-100px)] animate-fade-in">
-            <div className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 text-center">
+            <div className="w-full bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col h-full">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-800 text-center">
                     <h1 className="text-xl font-bold text-gray-900 dark:text-white">AI Interview for {job.title}</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Question {Math.min(currentQuestionIndex, totalQuestions)} of {totalQuestions}</p>
                 </div>
                 
-                <div className="flex-grow p-4 sm:p-6 overflow-y-auto bg-gray-50 dark:bg-gray-800/50">
-                    <div className="space-y-4">
+                <div className="flex-grow p-4 sm:p-6 overflow-y-auto bg-gray-50 dark:bg-gray-950/50">
+                    <div className="space-y-6">
                         {transcript.map((turn, index) => (
-                            <div key={index} className={`flex items-end gap-2 ${turn.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                {turn.role === 'model' && <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0"><BrainCircuitIcon className="w-5 h-5 text-white"/></div>}
-                                <div className={`max-w-md md:max-w-lg p-3 rounded-2xl ${turn.role === 'user' ? 'bg-primary-600 text-white rounded-br-none' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-none'}`}>
-                                    <p className="text-sm">{turn.text}</p>
+                            <div key={index} className={`flex items-start gap-3 ${turn.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                {turn.role === 'model' && <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center flex-shrink-0 border border-gray-700"><BrainCircuitIcon className="w-5 h-5 text-gray-300"/></div>}
+                                <div className={`max-w-md md:max-w-lg p-3 px-4 rounded-2xl shadow-sm ${turn.role === 'user' ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-br-none' : 'bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-none'}`}>
+                                    <p className="text-sm leading-relaxed">{turn.text}</p>
                                 </div>
                             </div>
                         ))}
@@ -199,17 +199,18 @@ export const Interview: React.FC<InterviewProps> = ({ job, resumeAnalysis, onInt
                     </div>
                 </div>
                 
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-b-xl">
                      <div className="flex flex-col sm:flex-row items-center gap-4">
                         <button
                             onClick={() => { isListening ? stopListening() : startListening() }}
                             disabled={isAITalking || isProcessing || currentQuestionIndex >= totalQuestions}
-                            className={`w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white disabled:bg-gray-400 disabled:cursor-not-allowed`}
+                            className={`relative w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg`}
                             aria-label={isListening ? 'Stop Listening' : 'Start Listening'}
                          >
+                            {isListening && <div className="absolute inset-0 rounded-full bg-red-500/50 animate-pulse-slow -z-10"></div>}
                             <MicIcon className="w-8 h-8" />
                         </button>
-                         <div className="flex-grow text-center sm:text-left p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                         <div className="flex-grow text-center sm:text-left p-2 bg-gray-100 dark:bg-gray-800 rounded-lg w-full">
                             <p className="font-semibold text-gray-500 dark:text-gray-400 text-xs mb-1">Status</p>
                             <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{statusText}</p>
                         </div>

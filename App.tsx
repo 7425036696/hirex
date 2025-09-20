@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { AppStep } from './types';
-import type { Job, ResumeAnalysis, InterviewFeedback, Plan } from './types';
+import type { Job, ResumeAnalysis, InterviewFeedback, Plan, Candidate } from './types';
 
 import { Header } from './components/Header';
 import { LandingPage } from './components/LandingPage';
@@ -13,12 +13,14 @@ import { MatchScore } from './components/MatchScore';
 import { Interview } from './components/Interview';
 import { FeedbackReport } from './components/FeedbackReport';
 import { AdminDashboard } from './components/AdminDashboard';
+import { InterviewerDashboard } from './components/InterviewerDashboard';
 import { Payment } from './components/Payment';
 
 
 const initialJobs: Job[] = [
   {
     id: 'swe-01',
+    creatorId: 'system',
     title: 'Senior Frontend Engineer',
     company: 'InnovateTech',
     location: 'Remote',
@@ -27,6 +29,7 @@ const initialJobs: Job[] = [
   },
   {
     id: 'pm-01',
+    creatorId: 'system',
     title: 'Product Manager',
     company: 'DataDriven Co.',
     location: 'New York, NY',
@@ -35,6 +38,7 @@ const initialJobs: Job[] = [
   },
    {
     id: 'ds-01',
+    creatorId: 'system',
     title: 'Data Scientist',
     company: 'AI Solutions Inc.',
     location: 'San Francisco, CA',
@@ -55,14 +59,16 @@ const App: React.FC = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
   
-  // NOTE: To make a user an admin, go to your Clerk Dashboard -> Users -> Select a user
-  // -> Metadata -> Public Metadata -> and add: { "role": "admin" }
+  // NOTE: To make a user an admin or interviewer, go to your Clerk Dashboard -> Users -> Select a user
+  // -> Metadata -> Public Metadata -> and add: { "role": "admin" } or { "role": "interviewer" }
   const isAdmin = user?.publicMetadata?.role === 'admin';
+  const isInterviewer = user?.publicMetadata?.role === 'interviewer';
   
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [resumeAnalysis, setResumeAnalysis] = useState<ResumeAnalysis | null>(null);
   const [interviewFeedback, setInterviewFeedback] = useState<InterviewFeedback | null>(null);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
 
   // --- New State for Monetization ---
   // In a real app, credits and subscription would be loaded from your database via an API call
@@ -70,21 +76,25 @@ const App: React.FC = () => {
   const [subscriptionTier, setSubscriptionTier] = useState<'Free' | 'Pro'>('Free');
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
 
+  const getHomeStep = useCallback(() => {
+    if (isAdmin) return AppStep.ADMIN;
+    if (isInterviewer) return AppStep.INTERVIEWER_DASHBOARD;
+    return AppStep.JOB_SELECTION;
+  }, [isAdmin, isInterviewer]);
+
   // Effect to handle redirection based on auth state
    useEffect(() => {
     if (!isLoaded) return;
     
     if (isSignedIn) {
-      // If user is signed in and is on a public page, redirect to job selection
       if (step === AppStep.LANDING || step === AppStep.SIGN_IN || step === AppStep.SIGN_UP) {
-        setStep(AppStep.JOB_SELECTION);
+        setStep(getHomeStep());
       }
     } else {
-      // If user is signed out, always return to landing page
       handleRestart();
       setStep(AppStep.LANDING);
     }
-  }, [isSignedIn, isLoaded, step]);
+  }, [isSignedIn, isLoaded, step, getHomeStep]);
 
 
   // --- Auth Handlers ---
@@ -93,9 +103,10 @@ const App: React.FC = () => {
   
   // --- Navigation & Core Flow Handlers ---
   const handleGoToAdmin = useCallback(() => setStep(AppStep.ADMIN), []);
+  const handleGoToDashboard = useCallback(() => setStep(AppStep.INTERVIEWER_DASHBOARD), []);
   const handleGoHome = useCallback(() => {
-      setStep(isSignedIn ? AppStep.JOB_SELECTION : AppStep.LANDING);
-  }, [isSignedIn]);
+      setStep(isSignedIn ? getHomeStep() : AppStep.LANDING);
+  }, [isSignedIn, getHomeStep]);
   
   const handleJobSelection = useCallback((job: Job) => {
     setSelectedJob(job);
@@ -111,7 +122,6 @@ const App: React.FC = () => {
 
   const handleStartInterview = useCallback(() => {
     if (credits > 0) {
-        // In a real app, you would also make an API call to decrement credits in the DB
         setCredits(prev => prev - 1);
         setStep(AppStep.INTERVIEW);
     } else {
@@ -122,21 +132,33 @@ const App: React.FC = () => {
   }, [credits]);
 
   const handleInterviewComplete = useCallback((feedback: InterviewFeedback) => {
+    if (user && selectedJob && resumeAnalysis) {
+        const newCandidate: Candidate = {
+            userId: user.id,
+            userName: user.fullName || 'Anonymous',
+            userEmail: user.primaryEmailAddress?.emailAddress || 'no-email',
+            jobId: selectedJob.id,
+            jobTitle: selectedJob.title,
+            resumeAnalysis: resumeAnalysis,
+            interviewFeedback: feedback,
+        };
+        setCandidates(prev => [...prev, newCandidate]);
+    }
     setInterviewFeedback(feedback);
     setStep(AppStep.FEEDBACK);
-  }, []);
+  }, [user, selectedJob, resumeAnalysis]);
   
   const handleRestart = useCallback(() => {
     setSelectedJob(null);
     setResumeAnalysis(null);
     setInterviewFeedback(null);
-    setStep(isSignedIn ? AppStep.JOB_SELECTION : AppStep.LANDING);
-  }, [isSignedIn]);
+    setStep(isSignedIn ? getHomeStep() : AppStep.LANDING);
+  }, [isSignedIn, getHomeStep]);
   
   const handleBackToJobs = useCallback(() => {
       setSelectedJob(null);
-      setStep(AppStep.JOB_SELECTION);
-  }, []);
+      setStep(getHomeStep());
+  }, [getHomeStep]);
   
   const handleReuploadResume = useCallback(() => {
     setResumeAnalysis(null);
@@ -146,7 +168,6 @@ const App: React.FC = () => {
   // --- Payment Handlers ---
   const handlePurchaseRequest = useCallback((plan: Plan) => {
       if (!isSignedIn) {
-          // If not signed in, prompt to sign up first
           handleGoToSignUp();
           return;
       }
@@ -159,25 +180,26 @@ const App: React.FC = () => {
   const handlePaymentSuccess = useCallback(() => {
     if(selectedPlan) {
         alert("Payment successful! Your account has been upgraded.");
-        // In a real app, update DB and re-fetch user data
         setSubscriptionTier('Pro');
         setCredits(prev => prev + selectedPlan.credits);
         setSelectedPlan(null);
-        setStep(AppStep.JOB_SELECTION);
+        setStep(getHomeStep());
     }
-  }, [selectedPlan]);
+  }, [selectedPlan, getHomeStep]);
   
   const handlePaymentFailure = useCallback(() => {
     alert("Payment failed. Please try again.");
     setSelectedPlan(null);
-    setStep(AppStep.JOB_SELECTION);
-  }, []);
+    setStep(getHomeStep());
+  }, [getHomeStep]);
 
 
-  // --- Admin Handlers ---
-  const handleAddJob = useCallback((newJob: Omit<Job, 'id'>) => {
-      setJobs(prevJobs => [...prevJobs, { ...newJob, id: `job-${Date.now()}` }]);
-  }, []);
+  // --- Admin/Interviewer Handlers ---
+  const handleAddJob = useCallback((newJob: Omit<Job, 'id' | 'creatorId'>) => {
+      if(!user) return;
+      setJobs(prevJobs => [...prevJobs, { ...newJob, id: `job-${Date.now()}`, creatorId: user.id }]);
+  }, [user]);
+
   const handleDeleteJob = useCallback((jobId: string) => {
       setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
   }, []);
@@ -194,6 +216,9 @@ const App: React.FC = () => {
         case AppStep.ADMIN:
           if (!isAdmin) return <JobSelection jobs={jobs} onSelectJob={handleJobSelection} />;
           return <AdminDashboard jobs={jobs} onAddJob={handleAddJob} onDeleteJob={handleDeleteJob} onExitAdmin={handleGoHome} />;
+        case AppStep.INTERVIEWER_DASHBOARD:
+          if (!isInterviewer) return <JobSelection jobs={jobs} onSelectJob={handleJobSelection} />;
+          return <InterviewerDashboard allJobs={jobs} allCandidates={candidates} onAddJob={handleAddJob} onDeleteJob={handleDeleteJob} currentUserId={user.id} />;
         case AppStep.JOB_SELECTION:
           return <JobSelection jobs={jobs} onSelectJob={handleJobSelection} />;
         case AppStep.RESUME_UPLOAD:
@@ -229,11 +254,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans">
         <Header 
             onSignIn={handleGoToSignIn}
             onSignUp={handleGoToSignUp}
             onAdmin={handleGoToAdmin}
+            onDashboard={handleGoToDashboard}
             onHome={handleGoHome}
             credits={credits}
             subscriptionTier={subscriptionTier}

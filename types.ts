@@ -1,5 +1,6 @@
 export interface Job {
   id: string;
+  creatorId: string; // ID of the admin or interviewer who created the job
   title: string;
   company: string;
   location: string;
@@ -17,6 +18,7 @@ export enum AppStep {
   INTERVIEW,
   FEEDBACK,
   ADMIN,
+  INTERVIEWER_DASHBOARD,
   PAYMENT,
 }
 
@@ -62,4 +64,14 @@ export interface Plan {
     priceDisplay: string;
     features: string[];
     credits: number;
+}
+
+export interface Candidate {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  jobId: string;
+  jobTitle: string;
+  resumeAnalysis: ResumeAnalysis;
+  interviewFeedback: InterviewFeedback;
 }
