@@ -1,0 +1,7 @@
+{
+  "name": "HireX AI",
+  "description": "An AI-powered interview platform that analyzes your resume, provides a job match score, and conducts a mock voice interview to help you prepare and land your dream job.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
